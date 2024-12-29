@@ -9,102 +9,89 @@ import org.springframework.security.authentication.AuthenticationCredentialsNotF
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.servlet.NoHandlerFoundException;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
-    /**
-     * Handles exceptions related to validation failures.
-     *
-     * @param ex the exception instance
-     * @return a response entity with an appropriate error message and status code
-     */
+
+    private Map<String, Object> createErrorResponse(String message, HttpStatus status) {
+        Map<String, Object> errorResponse = new HashMap<>();
+        errorResponse.put("timestamp", LocalDateTime.now());
+        errorResponse.put("status", status.value());
+        errorResponse.put("error", status.getReasonPhrase());
+        errorResponse.put("message", message);
+        return errorResponse;
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<?> handleValidationExceptions(MethodArgumentNotValidException ex) {
+    public ResponseEntity<Map<String, Object>> handleValidationExceptions(MethodArgumentNotValidException ex) {
         BindingResult bindingResult = ex.getBindingResult();
         List<FieldError> fieldErrors = bindingResult.getFieldErrors();
-        HashMap<String, Object> validations = new HashMap<>();
+        Map<String, String> validations = new HashMap<>();
         for (FieldError fieldError : fieldErrors) {
             validations.put(fieldError.getField(), fieldError.getDefaultMessage());
         }
-
-        return new ResponseEntity<>(validations, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(createErrorResponse(validations.toString(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
     }
 
-    /**
-     * Handles exceptions related to Serialisation and Deserialization.
-     *
-     * @param ex the exception instance
-     * @return a response entity with an appropriate error message and status code
-     */
     @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<String> handleHttpMessageNotReadableException(HttpMessageNotReadableException ex) {
+    public ResponseEntity<Map<String, Object>> handleHttpMessageNotReadableException(HttpMessageNotReadableException ex) {
+        String errorMessage = "Malformed JSON request or invalid value.";
         try {
-            String errorMessage = ex.getCause().getMessage();
-            String[] parts = errorMessage.split("`");
-            String enumType = parts[1].substring(parts[1].lastIndexOf('.') + 1);
-            errorMessage = "invalid value provided for :" + enumType;
-            return new ResponseEntity<>(errorMessage, HttpStatus.BAD_REQUEST);
-        } catch (Exception e) {
-            return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
+            String causeMessage = ex.getCause() != null ? ex.getCause().getMessage() : null;
+            if (causeMessage != null && causeMessage.contains("`")) {
+                String[] parts = causeMessage.split("`");
+                String enumType = parts[1].substring(parts[1].lastIndexOf('.') + 1);
+                errorMessage = "Invalid value provided for: " + enumType;
+            }
+        } catch (Exception ignored) {
         }
+        return new ResponseEntity<>(createErrorResponse(errorMessage, HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
     }
 
-    /**
-     * Handles exceptions where an expected entity is not found in the system.
-     *
-     * @param ex the exception instance
-     * @return a response entity with an appropriate error message and status code
-     */
     @ExceptionHandler(EntityNotFoundException.class)
-    public ResponseEntity<String> handleIdNotFoundException(EntityNotFoundException ex) {
-        return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
+    public ResponseEntity<Map<String, Object>> handleIdNotFoundException(EntityNotFoundException ex) {
+        return new ResponseEntity<>(createErrorResponse(ex.getMessage(), HttpStatus.NOT_FOUND), HttpStatus.NOT_FOUND);
     }
 
-    /**
-     * Handles exceptions related to invalid arguments.
-     *
-     * @param ex the exception instance
-     * @return a response entity with an appropriate error message and status code
-     */
     @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<?> handleIllegalArgumentException(IllegalArgumentException ex) {
-        HashMap<String, Object> error = new HashMap<>();
-        error.put("Error", ex.getMessage());
-        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+    public ResponseEntity<Map<String, Object>> handleIllegalArgumentException(IllegalArgumentException ex) {
+        return new ResponseEntity<>(createErrorResponse(ex.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
     }
 
-    /**
-     * Handles exceptions related to Authentication (token).
-     *
-     * @return a response entity with a appropriate error message and status code
-     */
     @ExceptionHandler(AuthenticationException.class)
-    public ResponseEntity<String> handleAuthenticationException() {
-        // Handle the specific exception here
-        return new ResponseEntity<>("You don't have the required permissions to access this resource.", HttpStatus.FORBIDDEN);
+    public ResponseEntity<Map<String, Object>> handleAuthenticationException() {
+        return new ResponseEntity<>(createErrorResponse("You don't have the required permissions to access this resource.", HttpStatus.FORBIDDEN), HttpStatus.FORBIDDEN);
     }
 
-    /**
-     * Handles exceptions related to Authorization.
-     *
-     * @return a response entity with a appropriate error message and status code
-     */
     @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<String> handleAccessDeniedException() {
-        // Handle the specific exception here
-        return new ResponseEntity<>("You don't have the required permissions to access this resource.", HttpStatus.FORBIDDEN);
+    public ResponseEntity<Map<String, Object>> handleAccessDeniedException() {
+        return new ResponseEntity<>(createErrorResponse("You don't have the required permissions to access this resource.", HttpStatus.FORBIDDEN), HttpStatus.FORBIDDEN);
     }
 
     @ExceptionHandler(AuthenticationCredentialsNotFoundException.class)
-    public ResponseEntity<String> handleAuthenticationCredentialsNotFoundException() {
-        return new ResponseEntity<>("You must provide an authorization token.", HttpStatus.FORBIDDEN);
+    public ResponseEntity<Map<String, Object>> handleAuthenticationCredentialsNotFoundException() {
+        return new ResponseEntity<>(createErrorResponse("You must provide an authorization token.", HttpStatus.FORBIDDEN), HttpStatus.FORBIDDEN);
     }
 
-}
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<Map<String, Object>> handleHttpRequestMethodNotSupportedException(HttpRequestMethodNotSupportedException ex) {
+        String errorMessage = "The " + ex.getMethod() + " method is not supported for this endpoint. Supported methods are: " + ex.getSupportedHttpMethods();
+        return new ResponseEntity<>(createErrorResponse(errorMessage, HttpStatus.METHOD_NOT_ALLOWED), HttpStatus.METHOD_NOT_ALLOWED);
+    }
 
+    @ExceptionHandler(NoHandlerFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleNoHandlerFoundException(NoHandlerFoundException ex) {
+        String errorMessage = "The requested resource was not found: " + ex.getRequestURL();
+        return new ResponseEntity<>(createErrorResponse(errorMessage, HttpStatus.NOT_FOUND), HttpStatus.NOT_FOUND);
+    }
+}

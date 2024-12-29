@@ -1,10 +1,7 @@
 package mr.iscae.dtos.requests;
 
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -32,5 +29,9 @@ public class ProduitRequest {
 
     @Size(max = 1000, message = "Description cannot exceed 1000 characters")
     private String description;
+
+    @NotNull(message = "Price cannot be null")
+    @PositiveOrZero(message = "Price must be zero or a positive value")
+    private Double price;
 }
 

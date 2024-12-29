@@ -21,14 +21,14 @@ public class ProduitService {
 
 
     public ProduitResponse createProduit(ProduitRequest produitRequest, MultipartFile imageFile) throws IOException {
-        // Upload the file and get the file URL
         String imageUrl = FileService.uploadFile(imageFile);
 
         Produit produit = Produit.builder()
                 .name(produitRequest.getName())
                 .category(produitRequest.getCategory())
-                .image(imageUrl) // Use the uploaded image URL
+                .image(imageUrl)
                 .description(produitRequest.getDescription())
+                .price(produitRequest.getPrice())
                 .build();
 
         Produit savedProduit = produitRepository.save(produit);
@@ -77,6 +77,7 @@ public class ProduitService {
                 .category(produit.getCategory())
                 .image(produit.getImage())
                 .description(produit.getDescription())
+                .price(produit.getPrice())
                 .build();
     }
 }

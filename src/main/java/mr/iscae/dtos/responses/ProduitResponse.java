@@ -16,4 +16,5 @@ public class ProduitResponse {
     private CATEGORY category;
     private String image;
     private String description;
+    private Double price;
 }

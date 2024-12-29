@@ -25,6 +25,9 @@ public class Produit {
     @Column(nullable = false, length = 600)
     private String image;
 
+    @Column(nullable = false)
+    private Double price;
+
     @Column(length = 1000)
     private String description;
 }

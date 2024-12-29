@@ -22,7 +22,7 @@ public class ProduitController {
     private ProduitService produitService;
 
     @PostMapping
-   // @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ProduitResponse> createProduit(
             @ModelAttribute ProduitRequest produitRequest,
             @RequestParam("imageFile") MultipartFile imageFile) {
