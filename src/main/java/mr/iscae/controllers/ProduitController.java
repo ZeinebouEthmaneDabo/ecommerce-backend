@@ -34,10 +34,15 @@ public class ProduitController {
         }
     }
 
-    @GetMapping
+    @GetMapping("/search")
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
-    public ResponseEntity<List<ProduitResponse>> getAllProduits() {
-        List<ProduitResponse> produits = produitService.getAllProduits();
+    public ResponseEntity<List<ProduitResponse>> searchAndFilterProduits(
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String category,
+            @RequestParam(required = false) Double minPrice,
+            @RequestParam(required = false) Double maxPrice
+    ) {
+        List<ProduitResponse> produits = produitService.searchAndFilter(name, category, minPrice, maxPrice);
         return ResponseEntity.ok(produits);
     }
 

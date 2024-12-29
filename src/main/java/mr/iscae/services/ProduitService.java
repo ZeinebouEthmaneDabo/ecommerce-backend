@@ -1,5 +1,6 @@
 package mr.iscae.services;
 
+import mr.iscae.constants.CATEGORY;
 import mr.iscae.dtos.requests.ProduitRequest;
 import mr.iscae.dtos.responses.ProduitResponse;
 import mr.iscae.entities.Produit;
@@ -36,8 +37,17 @@ public class ProduitService {
         return mapToResponse(savedProduit);
     }
 
-    public List<ProduitResponse> getAllProduits() {
-        return produitRepository.findAll().stream()
+    public List<ProduitResponse> searchAndFilter(String name, String category, Double minPrice, Double maxPrice) {
+        CATEGORY categoryEnum = null;
+        if (category != null) {
+            try {
+                categoryEnum = CATEGORY.valueOf(category.toUpperCase());
+            } catch (IllegalArgumentException e) {
+                throw new IllegalArgumentException("Invalid category: " + category);
+            }
+        }
+        List<Produit> produits = produitRepository.searchAndFilter(name, categoryEnum, minPrice, maxPrice);
+        return produits.stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
     }
