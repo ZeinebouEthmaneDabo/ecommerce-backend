@@ -6,7 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import mr.iscae.constants.CATEGORY;
+import mr.iscae.constants.Category;
 
 @Data
 @Builder
@@ -18,7 +18,7 @@ public class ProduitRequest {
     private String name;
 
     @NotNull(message = "Category cannot be null")
-    private CATEGORY category;
+    private Category category;
 
     @NotBlank(message = "Image cannot be blank")
     @Pattern(

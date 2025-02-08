@@ -1,6 +1,6 @@
 package mr.iscae.repositories;
 
-import mr.iscae.constants.CATEGORY;
+import mr.iscae.constants.Category;
 import mr.iscae.entities.Produit;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -15,7 +15,7 @@ public interface ProduitRepository extends JpaRepository<Produit, Long> {
             "AND (:maxPrice IS NULL OR p.price <= :maxPrice)")
     List<Produit> searchAndFilter(
             @Param("name") String name,
-            @Param("category") CATEGORY category,
+            @Param("category") Category category,
             @Param("minPrice") Double minPrice,
             @Param("maxPrice") Double maxPrice
     );

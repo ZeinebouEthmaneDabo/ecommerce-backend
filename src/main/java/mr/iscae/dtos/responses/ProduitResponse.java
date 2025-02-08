@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import mr.iscae.constants.CATEGORY;
+import mr.iscae.constants.Category;
 
 @Data
 @Builder
@@ -13,7 +13,7 @@ import mr.iscae.constants.CATEGORY;
 public class ProduitResponse {
     private Long id;
     private String name;
-    private CATEGORY category;
+    private Category category;
     private String image;
     private String description;
     private Double price;

@@ -1,6 +1,6 @@
 package mr.iscae.services;
 
-import mr.iscae.constants.CATEGORY;
+import mr.iscae.constants.Category;
 import mr.iscae.dtos.requests.ProduitRequest;
 import mr.iscae.dtos.responses.ProduitResponse;
 import mr.iscae.entities.Produit;
@@ -38,10 +38,10 @@ public class ProduitService {
     }
 
     public List<ProduitResponse> searchAndFilter(String name, String category, Double minPrice, Double maxPrice) {
-        CATEGORY categoryEnum = null;
+        Category categoryEnum = null;
         if (category != null) {
             try {
-                categoryEnum = CATEGORY.valueOf(category.toUpperCase());
+                categoryEnum = Category.valueOf(category.toUpperCase());
             } catch (IllegalArgumentException e) {
                 throw new IllegalArgumentException("Invalid category: " + category);
             }

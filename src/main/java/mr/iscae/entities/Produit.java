@@ -5,7 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import mr.iscae.constants.CATEGORY;
+import mr.iscae.constants.Category;
 @Entity
 @Data
 @Builder
@@ -20,7 +20,7 @@ public class Produit {
     private String name;
 
     @Enumerated(EnumType.STRING)
-    private CATEGORY category;
+    private Category category;
 
     @Column(nullable = false, length = 600)
     private String image;
