@@ -1,4 +1,4 @@
-package mr.iscae.configs;
+package vector.mind.configs;
 
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.firebase.FirebaseApp;
@@ -14,15 +14,12 @@ public class FirebaseInitialization {
 
     @PostConstruct
     public void initialize() throws IOException {
+        FileInputStream serviceAccount = new FileInputStream("firebase/ecommerce-13ffd-firebase-adminsdk-5kaia-21a754f362.json");
 
-        FileInputStream serviceAccount =
-                new FileInputStream("firebase/ecommerce-13ffd-firebase-adminsdk-5kaia-21a754f362.json");
-
-        FirebaseOptions options = new FirebaseOptions.Builder()
+        FirebaseOptions options = FirebaseOptions.builder()
                 .setCredentials(GoogleCredentials.fromStream(serviceAccount))
                 .build();
 
         FirebaseApp.initializeApp(options);
     }
-
 }
