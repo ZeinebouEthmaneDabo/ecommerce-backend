@@ -1,6 +1,6 @@
 package mr.iscae.constants;
 
-public enum Category {
+public enum CATEGORY {
     ALIMENTAIRE, ELECTROMENAGER, ELECTRONIQUE
 }
 
