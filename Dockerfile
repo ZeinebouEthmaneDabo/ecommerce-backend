@@ -7,8 +7,5 @@ RUN mvn clean package -B -DskipTests -X
 
 FROM openjdk:17
 COPY --from=builder /app/target/*.jar e-commerce.jar
-COPY  firebase/ firebase/
-
-
 
 ENTRYPOINT ["java", "-jar", "/e-commerce.jar"]

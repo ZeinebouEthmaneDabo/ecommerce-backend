@@ -18,11 +18,12 @@ public class ProduitService {
 
     @Autowired
     private ProduitRepository produitRepository;
-
+    @Autowired
+    private FileService fileService;
 
 
     public ProduitResponse createProduit(ProduitRequest produitRequest, MultipartFile imageFile) throws IOException {
-        String imageUrl = FileService.uploadFile(imageFile);
+        String imageUrl = fileService.uploadFile(imageFile);
 
         Produit produit = Produit.builder()
                 .name(produitRequest.getName())
@@ -30,6 +31,7 @@ public class ProduitService {
                 .image(imageUrl)
                 .description(produitRequest.getDescription())
                 .price(produitRequest.getPrice())
+                .stockQuantity(produitRequest.getStockQuantity())
                 .build();
 
         Produit savedProduit = produitRepository.save(produit);
@@ -65,10 +67,11 @@ public class ProduitService {
         if (produitRequest.getName() != null) produit.setName(produitRequest.getName());
         if (produitRequest.getCategory() != null) produit.setCategory(produitRequest.getCategory());
         if (imageFile != null && !imageFile.isEmpty()) {
-            String imageUrl = FileService.uploadFile(imageFile);
+            String imageUrl = fileService.uploadFile(imageFile);
             produit.setImage(imageUrl);
         }
         if (produitRequest.getDescription() != null) produit.setDescription(produitRequest.getDescription());
+        if (produitRequest.getStockQuantity() != null) produit.setStockQuantity(produitRequest.getStockQuantity());
 
         Produit updatedProduit = produitRepository.save(produit);
         return mapToResponse(updatedProduit);
@@ -88,6 +91,7 @@ public class ProduitService {
                 .image(produit.getImage())
                 .description(produit.getDescription())
                 .price(produit.getPrice())
+                .stockQuantity(produit.getStockQuantity())
                 .build();
     }
 }

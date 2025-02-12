@@ -24,7 +24,7 @@ public class ProduitController {
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ProduitResponse> createProduit(
-            @ModelAttribute ProduitRequest produitRequest,
+            @ModelAttribute @Valid ProduitRequest produitRequest,
             @RequestParam("imageFile") MultipartFile imageFile) {
         try {
             ProduitResponse response = produitService.createProduit(produitRequest, imageFile);

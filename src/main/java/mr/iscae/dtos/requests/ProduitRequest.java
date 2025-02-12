@@ -33,5 +33,10 @@ public class ProduitRequest {
     @NotNull(message = "Price cannot be null")
     @PositiveOrZero(message = "Price must be zero or a positive value")
     private Double price;
+
+    @NotNull(message = "quantity cannot be null")
+    @PositiveOrZero(message = "quantity must be zero or a positive value")
+    private Integer stockQuantity;
+
 }
 

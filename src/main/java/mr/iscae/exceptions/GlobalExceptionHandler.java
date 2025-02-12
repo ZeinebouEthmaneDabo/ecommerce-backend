@@ -94,4 +94,8 @@ public class GlobalExceptionHandler {
         String errorMessage = "The requested resource was not found: " + ex.getRequestURL();
         return new ResponseEntity<>(createErrorResponse(errorMessage, HttpStatus.NOT_FOUND), HttpStatus.NOT_FOUND);
     }
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<Map<String, Object>> handleIllegalStateException(IllegalStateException ex) {
+        return new ResponseEntity<>(createErrorResponse(ex.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
+    }
 }

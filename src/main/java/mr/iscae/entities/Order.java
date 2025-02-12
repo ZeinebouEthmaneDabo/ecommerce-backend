@@ -5,38 +5,41 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import mr.iscae.constants.Category;
-import java.time.LocalDateTime;
+import mr.iscae.constants.OrderStatus;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Produit {
+@Table(name = "_order")
+public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private String name;
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
+    @Column(nullable = false)
+    private Double totalAmount;
+
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private Category category;
+    @Builder.Default
+    private OrderStatus status = OrderStatus.PENDING;
 
-    @Column(nullable = false, length = 600)
-    private String image;
-
-    @Column(nullable = false)
-    private Double price;
-
-    @Column(length = 1000)
-    private String description;
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
+    private List<OrderItem> orderItems;
 
     @Column(nullable = false)
-    private Integer stockQuantity;
+    private String shippingAddress;
 
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
