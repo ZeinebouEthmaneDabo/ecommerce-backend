@@ -17,15 +17,18 @@ import java.util.stream.Collectors;
 @Service
 public class ProduitService {
 
-    @Autowired
-    private ProduitRepository produitRepository;
-    @Autowired
-    private FileService fileService;
+    private final ProduitRepository produitRepository;
+    private final FileService fileService;
+
+    public ProduitService(ProduitRepository produitRepository, FileService fileService) {
+        this.produitRepository = produitRepository;
+        this.fileService = fileService;
+    }
 
 
     public ProduitResponse createProduit(ProduitRequest produitRequest, MultipartFile imageFile) throws IOException {
         String imageUrl = fileService.uploadFile(imageFile);
-
+        System.out.println("imageUrl"+imageUrl);
         Produit produit = Produit.builder()
                 .name(produitRequest.getName())
                 .category(produitRequest.getCategory())

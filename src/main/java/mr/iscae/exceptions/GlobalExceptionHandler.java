@@ -103,4 +103,5 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(createErrorResponse(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR),
                 HttpStatus.INTERNAL_SERVER_ERROR);
     }
+
 }

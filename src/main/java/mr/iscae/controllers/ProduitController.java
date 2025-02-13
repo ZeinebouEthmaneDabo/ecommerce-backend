@@ -1,8 +1,10 @@
 package mr.iscae.controllers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.Valid;
 import mr.iscae.dtos.requests.ProduitRequest;
 import mr.iscae.dtos.responses.ProduitResponse;
+import mr.iscae.services.FileService;
 import mr.iscae.services.ProduitService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -24,12 +26,23 @@ public class ProduitController {
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ProduitResponse> createProduit(
-            @ModelAttribute @Valid ProduitRequest produitRequest,
-            @RequestParam("imageFile") MultipartFile imageFile) {
+            @Valid @RequestPart("request") String requestJson,
+            @RequestPart(value = "image" ) MultipartFile image
+    ) {
         try {
-            ProduitResponse response = produitService.createProduit(produitRequest, imageFile);
+            System.out.println("Received JSON: " + requestJson);
+            System.out.println("Image: " + (image != null ? image.getOriginalFilename() : "No image uploaded"));
+
+            if (image != null) {
+                    if (!FileService.isValidImage(image)) {
+                        throw new IllegalArgumentException("Invalid image type.");
+                    }
+
+            }
+            ProduitRequest request = new ObjectMapper().readValue(requestJson, ProduitRequest.class);
+            ProduitResponse response = produitService.createProduit(request, image);
             return ResponseEntity.ok(response);
-        } catch ( IOException e) {
+        } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }

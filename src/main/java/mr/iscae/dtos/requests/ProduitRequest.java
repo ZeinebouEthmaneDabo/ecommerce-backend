@@ -20,11 +20,6 @@ public class ProduitRequest {
     @NotNull(message = "Category cannot be null")
     private Category category;
 
-    @NotBlank(message = "Image cannot be blank")
-    @Pattern(
-            regexp = "^(http://|https://).*",
-            message = "Image must be a valid link starting with http:// or https://"
-    )
     private String image;
 
     @Size(max = 1000, message = "Description cannot exceed 1000 characters")
