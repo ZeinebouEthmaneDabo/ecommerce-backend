@@ -26,20 +26,18 @@ public class ProduitController {
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ProduitResponse> createProduit(
-            @Valid @RequestPart("request") String requestJson,
-            @RequestPart(value = "image" ) MultipartFile image
+            @Valid @RequestPart("request") ProduitRequest request,
+            @RequestPart(value = "image") MultipartFile image
     ) {
         try {
-            System.out.println("Received JSON: " + requestJson);
+            System.out.println("Received request: " + request);
             System.out.println("Image: " + (image != null ? image.getOriginalFilename() : "No image uploaded"));
 
-            if (image != null) {
-                    if (!FileService.isValidImage(image)) {
-                        throw new IllegalArgumentException("Invalid image type.");
-                    }
+                if (!FileService.isValidImage(image)) {
+                    throw new IllegalArgumentException("Invalid image type.");
+                }
 
-            }
-            ProduitRequest request = new ObjectMapper().readValue(requestJson, ProduitRequest.class);
+
             ProduitResponse response = produitService.createProduit(request, image);
             return ResponseEntity.ok(response);
         } catch (IOException e) {
@@ -70,15 +68,24 @@ public class ProduitController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ProduitResponse> updateProduit(
             @PathVariable Long id,
-            @ModelAttribute ProduitRequest produitRequest,
-            @RequestParam(value = "imageFile", required = false) MultipartFile imageFile) {
+            @Valid @RequestPart("request") ProduitRequest request,
+            @RequestPart(value = "image") MultipartFile imageFile
+    ) {
         try {
-            ProduitResponse response = produitService.updateProduit(id, produitRequest, imageFile);
+            System.out.println("Received request: " + request);
+            System.out.println("Image: " + (imageFile != null ? imageFile.getOriginalFilename() : "No image uploaded"));
+
+            if (!FileService.isValidImage(imageFile)) {
+                throw new IllegalArgumentException("Invalid image type.");
+            }
+
+            ProduitResponse response = produitService.updateProduit(id, request, imageFile);
             return ResponseEntity.ok(response);
         } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
+
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")

@@ -6,7 +6,6 @@ import mr.iscae.dtos.requests.ProduitRequest;
 import mr.iscae.dtos.responses.ProduitResponse;
 import mr.iscae.entities.Produit;
 import mr.iscae.repositories.ProduitRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
