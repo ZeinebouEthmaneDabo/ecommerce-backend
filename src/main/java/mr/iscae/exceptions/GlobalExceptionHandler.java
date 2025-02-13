@@ -98,4 +98,9 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, Object>> handleIllegalStateException(IllegalStateException ex) {
         return new ResponseEntity<>(createErrorResponse(ex.getMessage(), HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
     }
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<Map<String, Object>> handleRuntimeException(RuntimeException ex) {
+        return new ResponseEntity<>(createErrorResponse(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR),
+                HttpStatus.INTERNAL_SERVER_ERROR);
+    }
 }

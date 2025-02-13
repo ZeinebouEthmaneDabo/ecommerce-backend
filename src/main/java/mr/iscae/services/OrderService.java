@@ -1,5 +1,6 @@
 package mr.iscae.services;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import mr.iscae.constants.OrderStatus;
 import mr.iscae.dtos.requests.OrderItemRequest;
@@ -109,7 +110,7 @@ public class OrderService {
     @Transactional(readOnly = true)
     public OrderResponse getOrderById(Long orderId) {
         Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new RuntimeException("Order not found with id: " + orderId));
+                .orElseThrow(() -> new EntityNotFoundException("Order not found with id: " + orderId));
         return mapToOrderResponse(order);
     }
     @Transactional(readOnly = true)
@@ -133,84 +134,28 @@ public class OrderService {
     @Transactional
     public OrderResponse updateOrder(Long orderId, UpdateOrderRequest request) {
         Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new RuntimeException("Order not found with id: " + orderId));
+                .orElseThrow(() -> new EntityNotFoundException("Order not found with id: " + orderId));
+
+        // Only status updates are allowed
+        if (request.getStatus() == null) {
+            throw new IllegalArgumentException("Order status must be provided");
+        }
 
         // Check if order can be updated
         if (order.getStatus() == OrderStatus.DELIVERED) {
             throw new IllegalStateException("Cannot update delivered order");
         }
 
-        // Update shipping address if provided
-        if (request.getShippingAddress() != null) {
-            order.setShippingAddress(request.getShippingAddress());
+        // Validate status transition
+        if (request.getStatus() == OrderStatus.CANCELLED) {
+            if (order.getStatus() == OrderStatus.SHIPPED) {
+                throw new IllegalStateException("Cannot cancel order that is already shipped or delivered");
+            }
+            returnItemsToStock(order);
         }
 
-        // Update status if provided
-        if (request.getStatus() != null) {
-            // If trying to cancel
-            if (request.getStatus() == OrderStatus.CANCELLED) {
-                if (order.getStatus() == OrderStatus.SHIPPED || order.getStatus() == OrderStatus.DELIVERED) {
-                    throw new IllegalStateException("Cannot cancel order that is already shipped or delivered");
-                }
-                returnItemsToStock(order);
-            }
-            order.setStatus(request.getStatus());
-        }
-
-        // Update order items if provided
-        if (request.getOrderItems() != null && !request.getOrderItems().isEmpty()) {
-            // Store current order items before clearing them
-            List<OrderItem> oldOrderItems = new ArrayList<>(order.getOrderItems());
-
-            // Clear existing items from order
-            order.getOrderItems().clear();
-
-            // Return old items to stock first
-            for (OrderItem oldItem : oldOrderItems) {
-                Produit product = oldItem.getProduit();
-                product.setStockQuantity(product.getStockQuantity() + oldItem.getQuantity());
-                produitRepository.save(product);
-            }
-
-            // Process new items
-            List<OrderItem> newOrderItems = new ArrayList<>();
-            double newTotalAmount = 0.0;
-
-            for (OrderItemRequest itemRequest : request.getOrderItems()) {
-                Produit product = produitRepository.findById(itemRequest.getProductId())
-                        .orElseThrow(() -> new RuntimeException(
-                                "Product not found with id: " + itemRequest.getProductId()
-                        ));
-
-                // Validate stock
-                if (product.getStockQuantity() < itemRequest.getQuantity()) {
-                    throw new IllegalStateException(
-                            "Insufficient stock for product: " + product.getName() +
-                                    ". Available: " + product.getStockQuantity() +
-                                    ", Requested: " + itemRequest.getQuantity()
-                    );
-                }
-
-                // Create new order item
-                OrderItem orderItem = OrderItem.builder()
-                        .order(order)
-                        .produit(product)
-                        .quantity(itemRequest.getQuantity())
-                        .priceAtOrder(product.getPrice())
-                        .build();
-
-                newOrderItems.add(orderItem);
-                newTotalAmount += product.getPrice() * itemRequest.getQuantity();
-
-                // Update product stock
-                product.setStockQuantity(product.getStockQuantity() - itemRequest.getQuantity());
-                produitRepository.save(product);
-            }
-
-            // Update order with new items and total
-            order.getOrderItems().addAll(newOrderItems);
-            order.setTotalAmount(newTotalAmount);
-        }
+        // Update status
+        order.setStatus(request.getStatus());
 
         Order updatedOrder = orderRepository.save(order);
         return mapToOrderResponse(updatedOrder);

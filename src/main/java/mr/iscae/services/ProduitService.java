@@ -1,5 +1,6 @@
 package mr.iscae.services;
 
+import jakarta.persistence.EntityNotFoundException;
 import mr.iscae.constants.Category;
 import mr.iscae.dtos.requests.ProduitRequest;
 import mr.iscae.dtos.responses.ProduitResponse;
@@ -56,13 +57,13 @@ public class ProduitService {
 
     public ProduitResponse getProduitById(Long id) {
         Produit produit = produitRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Produit not found with ID: " + id));
+                .orElseThrow(() -> new EntityNotFoundException("Produit not found with ID: " + id));
         return mapToResponse(produit);
     }
 
     public ProduitResponse updateProduit(Long id, ProduitRequest produitRequest, MultipartFile imageFile) throws IOException {
         Produit produit = produitRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Produit not found with ID: " + id));
+                .orElseThrow(() -> new EntityNotFoundException ("Produit not found with ID: " + id));
 
         if (produitRequest.getName() != null) produit.setName(produitRequest.getName());
         if (produitRequest.getCategory() != null) produit.setCategory(produitRequest.getCategory());
