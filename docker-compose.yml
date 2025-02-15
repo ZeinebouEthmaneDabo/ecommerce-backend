@@ -6,6 +6,8 @@ services:
     image: e-commerce:latest
     container_name: e-commerce
     restart: always
+    ports:
+      - "8080:8080"
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/e-commerce
       SPRING_DATASOURCE_USERNAME: postgres
