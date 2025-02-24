@@ -1,14 +1,11 @@
-# Use an official OpenJDK runtime as a parent image
-FROM openjdk:17-jdk-alpine
-
-# Set the working directory inside the container
+FROM maven AS builder
 WORKDIR /app
+COPY pom.xml .
+RUN mvn dependency:go-offline
+COPY src/ src/
+RUN mvn clean package -B -DskipTests -X
 
-# Copy the application JAR file into the container
-COPY target/ecommerce-backend-0.0.1-SNAPSHOT.jar app.jar
+FROM openjdk:17
+COPY --from=builder /app/target/*.jar e-commerce.jar
 
-# Expose the port your app runs on
-EXPOSE 8081
-
-# Run the application
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["java", "-jar", "/e-commerce.jar"]

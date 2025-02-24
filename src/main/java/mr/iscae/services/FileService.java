@@ -1,40 +1,86 @@
 package mr.iscae.services;
 
-import com.google.cloud.storage.BlobInfo;
-import com.google.cloud.storage.Bucket;
-import com.google.cloud.storage.Storage;
-import com.google.cloud.storage.StorageException;
-import com.google.firebase.cloud.StorageClient;
+import io.minio.*;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.net.URL;
-import java.util.concurrent.TimeUnit;
+import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 public class FileService {
 
-    private static final String BUCKET_NAME = "ecommerce-13ffd.appspot.com";
+    private final MinioClient minioClient;
 
-    public static String uploadFile(MultipartFile multipartFile) throws IOException, StorageException {
-        if (multipartFile.isEmpty()) {
-            throw new IllegalArgumentException("MultipartFile is empty");
+    @Value("${minio.bucket}")
+    private String bucketName;
+
+    private static final String FILE_BASE_URL = "https://s3.api.hostflare.cloud/product/";
+
+    public String uploadFile(MultipartFile file) {
+        try {
+            // Validate file
+            if (file == null || file.isEmpty()) {
+                throw new IllegalArgumentException("File cannot be empty");
+            }
+
+            String uuid = UUID.randomUUID().toString();
+            String originalFilename = file.getOriginalFilename();
+            String fileName = uuid + "/" + originalFilename;  // Format: uuid/filename
+
+            // Upload file
+            minioClient.putObject(
+                    PutObjectArgs.builder()
+                            .bucket(bucketName)
+                            .object(fileName)
+                            .stream(file.getInputStream(), file.getSize(), -1)
+                            .contentType(file.getContentType())
+                            .build()
+            );
+
+            // Return complete URL
+            return FILE_BASE_URL + fileName;
+
+        } catch (Exception e) {
+            throw new RuntimeException("Error uploading file: " + e.getMessage(), e);
+        }
+    }
+
+    public String getFileUrl(String fileName) {
+        return FILE_BASE_URL + fileName;
+    }
+
+    public void deleteFile(String fileName) {
+        try {
+            minioClient.removeObject(
+                    RemoveObjectArgs.builder()
+                            .bucket(bucketName)
+                            .object(fileName)
+                            .build()
+            );
+        } catch (Exception e) {
+            throw new RuntimeException("Error deleting file: " + e.getMessage(), e);
+        }
+    }
+    private static final List<String> IMAGE_CONTENT_TYPES = Arrays.asList(
+            "image/png", "image/jpeg", "image/jpg",
+            "image/svg+xml",
+            "image/bmp", "image/tiff", "image/webp"
+    );
+
+    public static boolean isValidImage(MultipartFile file) {
+        return isValidContentType(file);
+    }
+    private static boolean isValidContentType(MultipartFile file) {
+        if (file == null || file.isEmpty()) {
+            return false;
         }
 
-        Bucket bucket = StorageClient.getInstance().bucket(BUCKET_NAME);
-        String blobName = multipartFile.getOriginalFilename();
-        Storage storage = bucket.getStorage();
-        assert blobName != null;
-        BlobInfo blobInfo = BlobInfo.newBuilder(BUCKET_NAME, blobName)
-                .setContentType(multipartFile.getContentType())
-                .build();
-        URL url = storage.signUrl(blobInfo, 500, TimeUnit.DAYS, Storage.SignUrlOption.withV2Signature());
-        String signedPath = url.toString();
-
-        bucket.getStorage().create(blobInfo, multipartFile.getBytes());
-
-
-        return signedPath;
+        String contentType = file.getContentType();
+        return FileService.IMAGE_CONTENT_TYPES.contains(contentType);
     }
 }
