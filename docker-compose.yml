@@ -36,7 +36,7 @@ services:
 
   pgadmin:
     image: dpage/pgadmin4
-    container_name: pgadmin
+    container_name: e-commerce-pgadmin
     restart: always
     ports:
       - "5053:80"
