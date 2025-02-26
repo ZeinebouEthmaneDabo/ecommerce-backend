@@ -6,6 +6,8 @@ import mr.iscae.dtos.requests.ProduitRequest;
 import mr.iscae.dtos.responses.ProduitResponse;
 import mr.iscae.entities.Produit;
 import mr.iscae.repositories.ProduitRepository;
+import mr.iscae.specifications.ProduitSpecification;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -51,7 +53,13 @@ public class ProduitService {
                 throw new IllegalArgumentException("Invalid category: " + category);
             }
         }
-        List<Produit> produits = produitRepository.searchAndFilter(name, categoryEnum, minPrice, maxPrice);
+
+        Specification<Produit> spec = Specification.where(ProduitSpecification.withName(name))
+                .and(ProduitSpecification.withCategory(categoryEnum))
+                .and(ProduitSpecification.withMinPrice(minPrice))
+                .and(ProduitSpecification.withMaxPrice(maxPrice));
+
+        List<Produit> produits = produitRepository.findAll(spec);
         return produits.stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
