@@ -7,6 +7,9 @@ import mr.iscae.dtos.responses.ProduitResponse;
 import mr.iscae.entities.Produit;
 import mr.iscae.repositories.ProduitRepository;
 import mr.iscae.specifications.ProduitSpecification;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -44,7 +47,7 @@ public class ProduitService {
         return mapToResponse(savedProduit);
     }
 
-    public List<ProduitResponse> searchAndFilter(String name, String category, Double minPrice, Double maxPrice) {
+    public Page<ProduitResponse> searchAndFilter(String name, String category, Double minPrice, Double maxPrice, int page, int size) {
         Category categoryEnum = null;
         if (category != null) {
             try {
@@ -59,12 +62,11 @@ public class ProduitService {
                 .and(ProduitSpecification.withMinPrice(minPrice))
                 .and(ProduitSpecification.withMaxPrice(maxPrice));
 
-        List<Produit> produits = produitRepository.findAll(spec);
-        return produits.stream()
-                .map(this::mapToResponse)
-                .collect(Collectors.toList());
-    }
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Produit> produitPage = produitRepository.findAll(spec, pageable);
 
+        return produitPage.map(this::mapToResponse);
+    }
     public ProduitResponse getProduitById(Long id) {
         Produit produit = produitRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Produit not found with ID: " + id));

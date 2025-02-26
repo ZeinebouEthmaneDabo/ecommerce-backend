@@ -7,6 +7,7 @@ import mr.iscae.dtos.responses.ProduitResponse;
 import mr.iscae.services.FileService;
 import mr.iscae.services.ProduitService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -54,13 +55,15 @@ public class ProduitController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<List<ProduitResponse>> searchAndFilterProduits(
+    public ResponseEntity<Page<ProduitResponse>> searchAndFilterProduits(
             @RequestParam(required = false) String name,
             @RequestParam(required = false) String category,
             @RequestParam(required = false) Double minPrice,
-            @RequestParam(required = false) Double maxPrice
+            @RequestParam(required = false) Double maxPrice,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
     ) {
-        List<ProduitResponse> produits = produitService.searchAndFilter(name, category, minPrice, maxPrice);
+        Page<ProduitResponse> produits = produitService.searchAndFilter(name, category, minPrice, maxPrice, page, size);
         return ResponseEntity.ok(produits);
     }
 
