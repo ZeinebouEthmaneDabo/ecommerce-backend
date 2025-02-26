@@ -27,7 +27,7 @@ public class AuthenticationService {
         private final JwtService jwtService;
         private final AuthenticationManager authenticationManager;
 
-        public String register(RegisterRequest request) {
+    public String register(RegisterRequest request) {
         var user = User.builder()
                 .fullName(request.getFullName())
                 .phone(request.getPhone())
