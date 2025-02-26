@@ -54,7 +54,6 @@ public class ProduitController {
     }
 
     @GetMapping("/search")
-    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     public ResponseEntity<List<ProduitResponse>> searchAndFilterProduits(
             @RequestParam(required = false) String name,
             @RequestParam(required = false) String category,
