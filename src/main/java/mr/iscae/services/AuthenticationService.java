@@ -13,11 +13,13 @@ import mr.iscae.dtos.responses.AuthenticationResponse;
 import mr.iscae.entities.User;
 import mr.iscae.repositories.UserRepository;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -32,6 +34,7 @@ public class AuthenticationService {
         private final JwtService jwtService;
         private final AuthenticationManager authenticationManager;
 
+    @ResponseBody
     public ResponseEntity<Map<String, String>> register(RegisterRequest request) {
         var user = User.builder()
                 .fullName(request.getFullName())
@@ -46,7 +49,10 @@ public class AuthenticationService {
         Map<String, String> response = new HashMap<>();
         response.put("message", "User registered successfully!");
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(response);
     }
 
 

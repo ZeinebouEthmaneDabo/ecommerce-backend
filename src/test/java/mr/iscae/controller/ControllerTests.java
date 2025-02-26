@@ -80,7 +80,7 @@ public class ControllerTests {
         request.setEmail("testuser@example.com");
         request.setPhone("42211414");
 
-        when(authenticationService.register(any(RegisterRequest.class))).thenReturn("Success");
+      //  when(authenticationService.register(any(RegisterRequest.class))).thenReturn("Success");
     
         mockMvc.perform(post("/api/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
