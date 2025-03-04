@@ -1,11 +1,12 @@
 package mr.iscae.controllers;
 
-import lombok.RequiredArgsConstructor;
+
 import mr.iscae.constants.OrderStatus;
 import mr.iscae.dtos.requests.OrderRequest;
 import mr.iscae.dtos.requests.UpdateOrderRequest;
 import mr.iscae.dtos.responses.OrderResponse;
 import mr.iscae.services.OrderService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,10 +14,10 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/orders")
-@RequiredArgsConstructor
 @CrossOrigin("*")
 public class OrderController {
-    private final OrderService orderService;
+    @Autowired
+    private  OrderService orderService;
 
     @PostMapping
     public ResponseEntity<OrderResponse> placeOrder(@RequestBody OrderRequest request) {
