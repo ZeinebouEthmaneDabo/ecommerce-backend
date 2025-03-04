@@ -96,11 +96,7 @@ public class ProduitService {
         produitRepository.delete(produit);
     }
 
-    public List<ProduitResponse> getAllProduits() {
-        return produitRepository.findAll().stream()
-                .map(this::mapToResponse)
-                .collect(Collectors.toList());
-    }
+
 
     private ProduitResponse mapToResponse(Produit produit) {
         return ProduitResponse.builder()

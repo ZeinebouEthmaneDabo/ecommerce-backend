@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/produits")
@@ -47,12 +46,7 @@ public class ProduitController {
         }
     }
 
-    @GetMapping
-    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
-    public ResponseEntity<List<ProduitResponse>> getAllProduits() {
-        List<ProduitResponse> produits = produitService.getAllProduits();
-        return ResponseEntity.ok(produits);
-    }
+
 
     @GetMapping("/search")
     public ResponseEntity<Page<ProduitResponse>> searchAndFilterProduits(

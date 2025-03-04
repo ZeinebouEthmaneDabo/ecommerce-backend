@@ -11,7 +11,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @SpringBootApplication
-public class ECommerceApplication {
+public class    ECommerceApplication {
 
     @Autowired
     private UserRepository userRepository;

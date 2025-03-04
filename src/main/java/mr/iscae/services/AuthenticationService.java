@@ -68,8 +68,10 @@ public class AuthenticationService {
         var jwtToken = jwtService.generateToken(user);
         return AuthenticationResponse.builder()
                 .accessToken(jwtToken)
+                .userId(user.getId())  // Add user ID here
                 .build();
     }
+
 
 
 }
