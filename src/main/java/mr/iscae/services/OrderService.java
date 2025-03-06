@@ -91,6 +91,7 @@ public class OrderService {
         response.setTotalAmount(order.getTotalAmount());
         response.setStatus(order.getStatus());
         response.setShippingAddress(order.getShippingAddress());
+        response.setCreatedAt(order.getCreatedAt());
 
         // Map user info
         UserOrderInfo userInfo = new UserOrderInfo();
