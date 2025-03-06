@@ -73,13 +73,14 @@ public class ProduitController {
     public ResponseEntity<ProduitResponse> updateProduit(
             @PathVariable Long id,
             @Valid @RequestPart("request") ProduitRequest request,
-            @RequestPart(value = "image") MultipartFile imageFile
+            @RequestPart(value = "image", required = false) MultipartFile imageFile
     ) {
         try {
             System.out.println("Received request: " + request);
             System.out.println("Image: " + (imageFile != null ? imageFile.getOriginalFilename() : "No image uploaded"));
 
-            if (!FileService.isValidImage(imageFile)) {
+            // Only validate the image if one was provided
+            if (imageFile != null && !FileService.isValidImage(imageFile)) {
                 throw new IllegalArgumentException("Invalid image type.");
             }
 
