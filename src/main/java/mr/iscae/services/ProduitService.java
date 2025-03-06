@@ -85,6 +85,7 @@ public class ProduitService {
         }
         if (produitRequest.getDescription() != null) produit.setDescription(produitRequest.getDescription());
         if (produitRequest.getStockQuantity() != null) produit.setStockQuantity(produitRequest.getStockQuantity());
+        if (produitRequest.getPrice() != null) produit.setPrice(produitRequest.getPrice());
 
         Produit updatedProduit = produitRepository.save(produit);
         return mapToResponse(updatedProduit);
