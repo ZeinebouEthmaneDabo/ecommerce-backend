@@ -20,6 +20,7 @@ import mr.iscae.repositories.UserRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,6 +35,7 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final ProduitRepository produitRepository;
     private final UserRepository userRepository;
+    private final JwtService jwtService;
 
     @Transactional
     public OrderResponse placeOrder(OrderRequest request) {
@@ -118,18 +120,31 @@ public class OrderService {
         return mapToOrderResponse(order);
     }
     @Transactional(readOnly = true)
-    public Page<OrderResponse> getAllOrders(OrderStatus status, Long userId, int page, int size) {
+    public Page<OrderResponse> getAllOrders(String token, OrderStatus status, Long userId, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<Order> orders;
 
-        if (status != null && userId != null) {
-            orders = orderRepository.findByStatusAndUserId(status, userId, pageable);
-        } else if (status != null) {
-            orders = orderRepository.findByStatus(status, pageable);
-        } else if (userId != null) {
-            orders = orderRepository.findByUserId(userId, pageable);
+        // Extract user ID and role from the token
+        Long tokenUserId = jwtService.extractUserId(token);
+        String role = jwtService.extractRole(token);
+
+        if ("ADMIN".equals(role)) {
+            // If admin, return all orders or filter by status/userId if provided
+            if (status != null && userId != null) {
+                orders = orderRepository.findByStatusAndUserId(status, userId, pageable);
+            } else if (status != null) {
+                orders = orderRepository.findByStatus(status, pageable);
+            } else if (userId != null) {
+                orders = orderRepository.findByUserId(userId, pageable);
+            } else {
+                orders = orderRepository.findAll(pageable);
+            }
         } else {
-            orders = orderRepository.findAll(pageable);
+            // If user, enforce userId = tokenUserId
+            if (userId != null && !userId.equals(tokenUserId)) {
+                throw new AccessDeniedException("You are not authorized to access this data.");
+            }
+            orders = orderRepository.findByUserId(tokenUserId, pageable);
         }
 
         return orders.map(this::mapToOrderResponse);
