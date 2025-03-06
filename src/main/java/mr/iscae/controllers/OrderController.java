@@ -7,6 +7,7 @@ import mr.iscae.dtos.requests.UpdateOrderRequest;
 import mr.iscae.dtos.responses.OrderResponse;
 import mr.iscae.services.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,13 +31,18 @@ public class OrderController {
     }
 
     @GetMapping
-    public ResponseEntity<List<OrderResponse>> getAllOrders(
+    public ResponseEntity<Page<OrderResponse>> getAllOrders(
             @RequestParam(required = false) OrderStatus status,
-            @RequestParam(required = false) Long userId) {
-        return ResponseEntity.ok(orderService.getAllOrders(status, userId));
+            @RequestParam(required = false) Long userId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        Page<OrderResponse> orders = orderService.getAllOrders(status, userId, page, size);
+        return ResponseEntity.ok(orders);
     }
 
-    
+
+
 
     @PatchMapping("/{orderId}")
     public ResponseEntity<OrderResponse> updateOrder(

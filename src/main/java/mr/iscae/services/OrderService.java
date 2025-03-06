@@ -17,6 +17,8 @@ import mr.iscae.entities.User;
 import mr.iscae.repositories.OrderRepository;
 import mr.iscae.repositories.ProduitRepository;
 import mr.iscae.repositories.UserRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -115,23 +117,23 @@ public class OrderService {
         return mapToOrderResponse(order);
     }
     @Transactional(readOnly = true)
-    public List<OrderResponse> getAllOrders(OrderStatus status, Long userId) {
-        List<Order> orders;
+    public Page<OrderResponse> getAllOrders(OrderStatus status, Long userId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Order> orders;
 
         if (status != null && userId != null) {
-            orders = orderRepository.findByStatusAndUserId(status, userId);
+            orders = orderRepository.findByStatusAndUserId(status, userId, pageable);
         } else if (status != null) {
-            orders = orderRepository.findByStatus(status);
+            orders = orderRepository.findByStatus(status, pageable);
         } else if (userId != null) {
-            orders = orderRepository.findByUserId(userId);
+            orders = orderRepository.findByUserId(userId, pageable);
         } else {
-            orders = orderRepository.findAll();
+            orders = orderRepository.findAll(pageable);
         }
 
-        return orders.stream()
-                .map(this::mapToOrderResponse)
-                .collect(Collectors.toList());
+        return orders.map(this::mapToOrderResponse);
     }
+
     @Transactional
     public OrderResponse updateOrder(Long orderId, UpdateOrderRequest request) {
         Order order = orderRepository.findById(orderId)
