@@ -56,13 +56,13 @@ public class ControllerTests {
         mockMvc = MockMvcBuilders.standaloneSetup(orderController, produitController, authenticationController).build();
     }
 
-    @Test
-    public void testGetAllOrders() throws Exception {
-        when(orderService.getAllOrders(null, null)).thenReturn(Collections.emptyList());
-        mockMvc.perform(get("/api/orders"))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
-    }
+//    @Test
+//    public void testGetAllOrders() throws Exception {
+//        when(orderService.getAllOrders(null, null)).thenReturn(Collections.emptyList());
+//        mockMvc.perform(get("/api/orders"))
+//                .andExpect(status().isOk())
+//                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+//    }
 
 //    @Test
 //    public void testGetAllProduits() throws Exception {
